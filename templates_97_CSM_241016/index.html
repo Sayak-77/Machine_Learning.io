@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ML Model Selection</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Anek+Devanagari:wght@100..800&family=Raleway:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet"/>
+</head>
+
+<body>
+  <div class="container mt-5">
+    <h1 class="text-center">Machine Learning Model Selection</h1>
+    <p class="text-center">Upload your dataset and find the best performing model with visual results.</p>
+
+    <!-- Error Display -->
+    {% if error %}
+    <div class="alert alert-danger text-center" role="alert">
+      {{ error }}
+    </div>
+    {% endif %}
+
+    <!-- File Upload Form -->
+    <form id="uploadForm" enctype="multipart/form-data" class="text-center mb-4">
+      <div class="input-group mb-3 justify-content-center">
+        <input type="file" name="dataset" class="form-control w-50" required />
+      </div>
+      <button type="submit" class="btn btn-success">Upload Dataset</button>
+    </form>
+
+    <!-- Train Model Form -->
+    <form method="POST" action="/train" class="text-center mb-3">
+      <button type="submit" class="btn btn-primary" onclick="showModal()">Train Model</button>
+    </form>
+
+    <!-- Visualize Graph Button -->
+    <form method="GET" action="/visualize" class="text-center mb-5">
+      <button type="submit" class="btn btn-warning">Visualize Graph</button>
+    </form>
+
+    <hr>
+
+    <!-- Output Results -->
+    {% if output %}
+    <h2 class="mt-4 text-center">Results</h2>
+    <div class="row justify-content-center">
+      {% for size, model, filename in output %}
+      <div class="col-md-6 mt-3">
+        <div class="card shadow-sm">
+          <div class="card-body">
+            <h5 class="card-title">Dataset Size: {{ size }}</h5>
+            <p class="card-text">Best Model: <strong>{{ model }}</strong></p>
+            <img src="{{ filename }}" alt="Model Visualization" class="img-fluid rounded" />
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Uploading Modal -->
+  <div class="modal fade" id="uploadingModal" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content text-center">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modalLabel"><strong style="font-family: 'Anek Devanagari', sans-serif; font-weight: 600;">UPLOADING</strong></h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          Please wait while we upload the dataset to our system and extract data from it. Click OK to continue...
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-primary" data-bs-dismiss="modal" onclick="proceed()">OK</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Processing Modal -->
+  <div class="modal fade" id="processingModal" tabindex="-1" aria-labelledby="modalLabel">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalLabel"><strong style="font-family: 'Anek Devanagari', sans-serif;font-weight: 600">PROCESSING</strong></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Applying Regression and Calssification Algorithms.
+                The Best Model is being Generated and Trained. Please wait...
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">OK</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    const showModal = () => {
+        const modal = new bootstrap.Modal(document.getElementById("processingModal"));
+        modal.show();
+        setTimeout(() => modal.hide(), 5000); // hide modal automatically after 5s
+    };
+
+        // Intercept form submit to show modal
+    document.getElementById("uploadForm").addEventListener("submit", function (event) {
+        event.preventDefault(); // Prevent immediate POST
+        const uploadModal = new bootstrap.Modal(document.getElementById("uploadingModal"));
+        uploadModal.show();
+    });
+
+    // Proceed only after user clicks OK
+    function proceed() {
+        const form = document.getElementById("uploadForm");
+        form.method = "POST"; // Set method explicitly
+        form.action = "/upload"; // Set the backend route
+        form.submit();
+    }
+  </script>
+</body>
+</html>
